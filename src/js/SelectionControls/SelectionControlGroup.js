@@ -8,7 +8,6 @@ import minMaxLoop from '../utils/NumberUtils/minMaxLoop';
 import controlled from '../utils/PropTypes/controlled';
 import SelectionControl from './SelectionControl';
 
-
 /**
  * A custom PropTypes validator to make sure that each `control` in the `controls` prop
  * contains the given `propName`, or the `SelectionControlGroup` has defined that prop.
@@ -20,15 +19,16 @@ function requiredByAllControls(validator) {
     if (!err && typeof props[propName] === 'undefined') {
       const invalids = props.controls.filter(c => !c[propName]).map((_, i) => i);
       if (invalids.length) {
-        const invalidPrefix = invalids.length === props.controls.length
-          ? 'All `controls`'
-          : `The \`controls\` at indexes \`${invalids.join('`, `')}\``;
+        const invalidPrefix =
+          invalids.length === props.controls.length
+            ? 'All `controls`'
+            : `The \`controls\` at indexes \`${invalids.join('`, `')}\``;
         const invalidMsg = `${invalidPrefix} are missing the \`${propName}\` prop.`;
 
         err = new Error(
           `The \`${propName}\` prop is required to make \`${component}\` accessible for users of ` +
-          `assistive technologies such as screen readers. Either add the \`${propName}\` to the \`${component}\` ` +
-          `or add the \`${propName}\` to each \`control\` in the \`controls\` prop. ${invalidMsg}`
+            `assistive technologies such as screen readers. Either add the \`${propName}\` to the \`${component}\` ` +
+            `or add the \`${propName}\` to each \`control\` in the \`controls\` prop. ${invalidMsg}`
         );
       }
     }
@@ -36,7 +36,6 @@ function requiredByAllControls(validator) {
     return err;
   };
 }
-
 
 /**
  * The `SelectionControlGroup` component is used to simplify the generation of a list
@@ -73,10 +72,7 @@ export default class SelectionControlGroup extends PureComponent {
      * each `control` in the `controls` prop *must* have an `id` prop. This is required for
      * accessibility.
      */
-    id: requiredByAllControls(PropTypes.oneOfType([
-      PropTypes.number,
-      PropTypes.string,
-    ])),
+    id: requiredByAllControls(PropTypes.oneOfType([PropTypes.number, PropTypes.string])),
 
     /**
      * The type to apply to each `SelectionControl` in the group. Only `checkbox` and `radio` is
@@ -125,20 +121,12 @@ export default class SelectionControlGroup extends PureComponent {
      * };
      * ```
      */
-    controlComponent: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.func,
-      PropTypes.object,
-    ]).isRequired,
+    controlComponent: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]).isRequired,
 
     /**
      * The component to render the optional `label` in.
      */
-    labelComponent: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.func,
-      PropTypes.object,
-    ]).isRequired,
+    labelComponent: PropTypes.oneOfType([PropTypes.string, PropTypes.func, PropTypes.object]).isRequired,
 
     /**
      * An optional function to call when any `SelectionControl`'s `checked` state is changed
@@ -165,10 +153,7 @@ export default class SelectionControlGroup extends PureComponent {
      * It is either required to have this prop set or every `control` in the `controls` prop to
      * have the `name` prop.
      */
-    name: requiredByAllControls(PropTypes.oneOfType([
-      PropTypes.number,
-      PropTypes.string,
-    ])),
+    name: requiredByAllControls(PropTypes.oneOfType([PropTypes.number, PropTypes.string])),
 
     /**
      * The default value for the `SelectionControlGroup`. This can either be a single value
@@ -176,22 +161,14 @@ export default class SelectionControlGroup extends PureComponent {
      * and the group is uncontrolled, it is recommended to set this prop. Otherwise the first
      * value of the `controls` prop will be used as the default value.
      */
-    defaultValue: PropTypes.oneOfType([
-      PropTypes.bool,
-      PropTypes.number,
-      PropTypes.string,
-    ]),
+    defaultValue: PropTypes.oneOfType([PropTypes.bool, PropTypes.number, PropTypes.string]),
 
     /**
      * An optional value to use for the `SelectionControlGroup`. This will make the component
      * controlled and require the `onChange` prop to be defined. Like the `defaultValue`, this
      * can either be a single value or a comma-delimited list of checkbox values.
      */
-    value: controlled(PropTypes.oneOfType([
-      PropTypes.bool,
-      PropTypes.number,
-      PropTypes.string,
-    ]), 'onChange'),
+    value: controlled(PropTypes.oneOfType([PropTypes.bool, PropTypes.number, PropTypes.string]), 'onChange'),
 
     /**
      * A list of objects to create the `SelectionControl` components. The shape of the object
@@ -200,18 +177,13 @@ export default class SelectionControlGroup extends PureComponent {
      *
      * The `SelectionControl` will inherit any inheritable props from the `SelectionControlGroup`.
      */
-    controls: PropTypes.arrayOf(PropTypes.shape({
-      key: PropTypes.oneOfType([
-        PropTypes.number,
-        PropTypes.string,
-      ]),
-      label: PropTypes.node.isRequired,
-      value: PropTypes.oneOfType([
-        PropTypes.bool,
-        PropTypes.number,
-        PropTypes.string,
-      ]).isRequired,
-    })).isRequired,
+    controls: PropTypes.arrayOf(
+      PropTypes.shape({
+        key: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+        label: PropTypes.node.isRequired,
+        value: PropTypes.oneOfType([PropTypes.bool, PropTypes.number, PropTypes.string]).isRequired,
+      })
+    ).isRequired,
 
     /**
      * Boolean if the `SelectionControl` should be displayed inline.
@@ -320,22 +292,20 @@ export default class SelectionControlGroup extends PureComponent {
   }
 
   _isChecked(value, controlValue, type) {
-    return type === 'radio'
-      ? value === controlValue
-      : value.split(',').indexOf(controlValue) !== -1;
+    return type === 'radio' ? value === controlValue : value.split(',').indexOf(controlValue) !== -1;
   }
 
-  _setGroup = (group) => {
+  _setGroup = group => {
     this._group = group;
   };
 
-  _handleChange = (e) => {
+  _handleChange = e => {
     let value = e.target.value;
     if (this.props.type === 'checkbox') {
       const { checked } = e.target;
       const currentValue = getField(this.props, this.state, 'value');
-      const existsIndex = currentValue.indexOf(value);
-      if (existsIndex === -1 && checked) {
+      const existsIndex = this._isChecked(currentValue, value, 'checkbox');
+      if (!existsIndex && checked) {
         value = `${currentValue ? `${currentValue},` : ''}${value}`;
       } else if (existsIndex > -1 && !checked) {
         value = currentValue.replace(new RegExp(`${value},?`), '');
@@ -353,7 +323,7 @@ export default class SelectionControlGroup extends PureComponent {
     }
   };
 
-  _handleKeyDown = (e) => {
+  _handleKeyDown = e => {
     if (this.props.onKeyDown) {
       this.props.onKeyDown(e);
     }
@@ -442,7 +412,11 @@ export default class SelectionControlGroup extends PureComponent {
 
     let ariaLabel;
     if (label) {
-      ariaLabel = <LabelComponent className={labelClassName} id={`${id}-group-label`}>{label}</LabelComponent>;
+      ariaLabel = (
+        <LabelComponent className={labelClassName} id={`${id}-group-label`}>
+          {label}
+        </LabelComponent>
+      );
     }
 
     return (
